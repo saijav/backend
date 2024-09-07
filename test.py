@@ -2,20 +2,35 @@ import requests
 
 BASE = "http://127.0.0.1:8000/"
 
-response = requests.patch(BASE + "budget/2", {"spent": 900, "budget_left": 100})
+response = requests.get(BASE + "budgets/1")
+print(response.json())
 
-#response = requests.put(BASE + "budget/3", {"id":3, "name":"toka", "amount":10000, "spent": 1000, "budget_left": 9000})
-#print(response.json())
+input()
 
-#response = requests.put(BASE + "budget/4", {"id": 4, "name": "eka", "amount":2700, "spent": 1000, "budget_left": 1700})
-#print(response.json())
+response = requests.put(BASE + f"budgets/5", {"id":5, "name":"viides", "amount":0, "spent": 1000, "budget_left": -1000})
+print(response.json())
 
-#input()
+response = requests.put(BASE + "budgets/6", {"id": 6, "name": "kuudes", "amount":5, "spent": 2, "budget_left": 3})
+print(response.json())
 
-#response = requests.delete(BASE + "budget/2")
-#print(response)
+input()
 
-#input()
+response = requests.patch(BASE + "budgets/6", {"id": 6, "spent": 1, "budget_left": 2})
 
-response = requests.get(BASE + "budget/2")
+input()
+
+
+response = requests.get(BASE + "budgets/1")
+print(response.json())
+response = requests.get(BASE + "budgets/2")
+print(response.json())
+response = requests.get(BASE + "budgets/3")
+print(response.json())
+response = requests.get(BASE + "budgets/4")
+print(response.json())
+response = requests.get(BASE + "budgets/5")
+print(response.json())
+response = requests.get(BASE + "budgets/6")
+print(response.json())
+response = requests.get(BASE + "budgets/7")
 print(response.json())

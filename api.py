@@ -1,28 +1,8 @@
-from flask import Flask, abort
+import budgets_db
+import json
+from flask import Flask, abort, jsonify
 from flask_restful import Api, Resource, reqparse, fields, marshal_with
 from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-
-class BudgetModel(db.Model):
-    __tablename__ = 'budgets'
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(20), nullable=False)
-    amount = db.Column(db.Integer, nullable=False)
-    spent = db.Column(db.Integer, nullable=False)
-    budget_left = db.Column(db.Integer, nullable=False)
-
-    def __repr__(self):
-        return f"Budget(name = {name}, amount = {amount}, spent = {spent}, budget_left = {bugdet_left})"
-
-api = Api(app)
-
-#with app.app_context():
- #  db.create_all()
 
 budget_put_args = reqparse.RequestParser()
 budget_put_args.add_argument("id", type=int, help="The id of the budget is required", required=True, location='form')
@@ -46,29 +26,34 @@ resource_fields = {
     'budget_left': fields.Integer,
 }
 
+@budgets_db.app.route('/')
+def hello_world():
+    return "<p>Terve!<p>"
+
 class Budget(Resource):
+    
     @marshal_with(resource_fields)
     def get(self, budget_id):
-        result = BudgetModel.query.filter_by(id=budget_id).first()
+        result = budgets_db.BudgetModel.query.filter_by(id=budget_id).first()
         if not result:
-            abort(404, description="Could not found budget with that id")
+            abort(404, description="Could not found with that id..")
         return result
     
     @marshal_with(resource_fields)
     def put(self, budget_id):
         args = budget_put_args.parse_args()
-        result = BudgetModel.query.filter_by(id=budget_id).first()
+        result = budgets_db.BudgetModel.query.filter_by(id=budget_id).first()
         if result:
             abort(409, description="Budget id taken...")
 
-        budget = BudgetModel(id=args['id'], name=args['name'], amount=args['amount'], spent=args['spent'], budget_left=args['budget_left'])
-        db.session.add(budget)
-        db.session.commit()
+        budget = budgets_db.BudgetModel(id=args['id'], name=args['name'], amount=args['amount'], spent=args['spent'], budget_left=args['budget_left'])
+        budgets_db.db.session.add(budget)
+        budgets_db.db.session.commit()
         return budget, 201
     
     def patch(self, budget_id):
         args = budget_update_args.parse_args()
-        result = BudgetModel.query.filter_by(id=budget_id).first()
+        result = budgets_db.BudgetModel.query.filter_by(id=budget_id).first()
         if not result:
             abort(404, description="Could not found")
 
@@ -81,7 +66,7 @@ class Budget(Resource):
         if args['budget_left']:
             result.budget_left = args['budget_left']
 
-        db.session.commit()
+        budgets_db.db.session.commit()
 
         return result
 
@@ -91,8 +76,7 @@ class Budget(Resource):
         
         return '', 204
 
-    
-api.add_resource(Budget, "/budget/<int:budget_id>")
+budgets_db.api.add_resource(Budget, "/budgets/<int:budget_id>")
 
 if __name__ == "__main__":
-    app.run(port=8000, debug=True)
+    budgets_db.app.run(port=8000, debug=True)
